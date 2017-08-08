@@ -6,7 +6,7 @@ This asset is useful to set asset's import settings automatically.
 Open setting window with
 ##### Window > CustomAssetImporter > [Audio/Texuture] Importer
 
-
+![CustomAssetImporterDemo](https://github.com/charcolle/CustomAssetImporter/blob/master/DescFiles/CustomAssetImporter.gif?raw=true)
 
 ## Texture Importer
 ...later...
