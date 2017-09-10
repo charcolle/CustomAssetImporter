@@ -1,4 +1,4 @@
-# CustomAssetImporter version0.1.0
+# CustomAssetImporter version0.2.0
 This asset is useful to set asset's import settings automatically.
 * Unity Version: 2017.1.0f3
 
@@ -11,4 +11,6 @@ Open setting window with
 ## Texture Importer
 ...comming soon...
 ## Audio Imorter
+...comming soon...
+## Model Imorter
 ...comming soon...
