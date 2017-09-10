@@ -23,7 +23,7 @@ public class CustomTextureImporterSettings : ScriptableObject {
                 if ( Path.GetDirectoryName( assetPath ).Equals( importer.TargetName ) )
                     return importer;
 
-            } else if ( importer.Type.Equals( ImportTargetType.AllInDirectoryPath ) ) {
+            } else if ( importer.Type.Equals( ImportTargetType.DirectoryPathRecursively ) ) {
                 if ( Path.GetDirectoryName( assetPath ).Contains( importer.TargetName ) )
                     return importer;
 

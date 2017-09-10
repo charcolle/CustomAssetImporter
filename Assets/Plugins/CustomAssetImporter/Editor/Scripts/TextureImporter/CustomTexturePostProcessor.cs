@@ -99,8 +99,13 @@ namespace charcolle.Utility.CustomAssetImporter {
                 textureImporter.SetPlatformTextureSettings( SetCustomTextureSettings( "iPhone", customImporter.OverrideForiOSSetting ) );
 
             // texture cannot be get at first import
-            if ( texture == null && customSettings.FitSize.Value )
+            if ( texture == null && customSettings.FitSize.Value ) {
                 AssetDatabase.ImportAsset( assetPath );
+                return;
+            }
+
+            if ( customImporter.isLogger )
+                Debug.Log( "CustomAssetImporter: " + customImporter.Log );
         }
 
         /// <summary>

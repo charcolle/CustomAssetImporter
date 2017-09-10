@@ -8,10 +8,12 @@ namespace charcolle.Utility.CustomAssetImporter {
 
         private const string SEARCH_AUDIOIMPORTER_KEY   = "CustomAudioImporterSettings";
         private const string SEARCH_TEXTUREIMPORTER_KEY = "CustomTextureImporterSettings";
+        private const string SEARCH_MODELIMPORTER_KEY   = "CustomModelImporterSettings";
         private const string SEARCH_MAINSCRIPT_KEY      = "CustomAssetImporterMenu";
 
-        private const string NAME_AUDIOIMPORTER     = "CustomAudioImporterSettings.asset";
-        private const string NAME_TEXTUREIMPORTER   = "CustomTextureImporterSettings.asset";
+        private const string NAME_AUDIOIMPORTER         = "CustomAudioImporterSettings.asset";
+        private const string NAME_TEXTUREIMPORTER       = "CustomTextureImporterSettings.asset";
+        private const string NAME_MODELIMPORTER         = "CustomModelImporterSettings.asset";
 
         /// <summary>
         /// find CustomAudioImporterSettings
@@ -32,6 +34,17 @@ namespace charcolle.Utility.CustomAssetImporter {
             var asset = FindAssetByType<CustomTextureImporterSettings>( SEARCH_TEXTUREIMPORTER_KEY );
             if ( asset == null )
                 asset = CreateCustomTextureImporterSetting();
+            return asset;
+        }
+
+        /// <summary>
+        /// find CustomModelImporterSettings
+        /// if cannot, create the asset
+        /// </summary>
+        public static CustomModelImporterSettings GetModelImporter() {
+            var asset = FindAssetByType<CustomModelImporterSettings>( SEARCH_MODELIMPORTER_KEY );
+            if ( asset == null )
+                asset = CreateCustomModelImporterSetting();
             return asset;
         }
 
@@ -83,6 +96,18 @@ namespace charcolle.Utility.CustomAssetImporter {
             var savePath = Path.Combine( saveDataPath, NAME_TEXTUREIMPORTER );
 
             var asset = ScriptableObject.CreateInstance<CustomTextureImporterSettings>();
+            AssetDatabase.CreateAsset( asset, savePath );
+            AssetDatabase.Refresh();
+            return asset;
+        }
+
+        /// <summary>
+        /// create CustomModelImporter ScriptableObject
+        /// </summary>
+        private static CustomModelImporterSettings CreateCustomModelImporterSetting() {
+            var savePath = Path.Combine( saveDataPath, NAME_MODELIMPORTER );
+
+            var asset = ScriptableObject.CreateInstance<CustomModelImporterSettings>();
             AssetDatabase.CreateAsset( asset, savePath );
             AssetDatabase.Refresh();
             return asset;
@@ -141,6 +166,35 @@ namespace charcolle.Utility.CustomAssetImporter {
         private static T getObjectFromGUID<T>( string guid ) where T : UnityEngine.Object {
             var assetPath = AssetDatabase.GUIDToAssetPath( guid );
             return AssetDatabase.LoadAssetAtPath<T>( assetPath );
+        }
+
+        //=============================================================================
+        // Importer
+        //=============================================================================
+        public static void ReImport<T>( CustomImporterClass<T> importer ) {
+            if ( string.IsNullOrEmpty( importer.TargetName ) )
+                return;
+
+            if ( importer.Type.Equals( ImportTargetType.FilePath ) ) {
+                AssetDatabase.ImportAsset( importer.TargetName, ImportAssetOptions.Default );
+
+            } else if ( importer.Type.Equals( ImportTargetType.FileName ) ) {
+                var files = AssetDatabase.FindAssets( Path.GetFileNameWithoutExtension( importer.TargetName ) );
+                for ( int i = 0; i < files.Length; i++ )
+                    AssetDatabase.ImportAsset( AssetDatabase.GUIDToAssetPath( files[i] ), ImportAssetOptions.Default );
+
+            } else if ( importer.Type.Equals( ImportTargetType.DirectoryName ) ) {
+                var dirName = Path.GetFileName( importer.TargetName );
+                var dirs = Directory.GetDirectories( Application.dataPath, dirName, SearchOption.AllDirectories );
+
+                for ( int i = 0; i < dirs.Length; i++ ) {
+                    var dirPath = dirs[i].Replace( "\\", "/" ).Replace( Application.dataPath, "Assets" );
+                    AssetDatabase.ImportAsset( dirPath, ImportAssetOptions.ImportRecursive );
+                }
+
+            } else {
+                AssetDatabase.ImportAsset( importer.TargetName, ImportAssetOptions.ImportRecursive );
+            }
         }
 
     }

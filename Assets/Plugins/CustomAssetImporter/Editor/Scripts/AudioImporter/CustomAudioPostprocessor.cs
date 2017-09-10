@@ -40,6 +40,9 @@ namespace charcolle.Utility.CustomAssetImporter {
                 audioImporter.SetOverrideSampleSettings( "Android", SetCustomAudioSettings( customImporter.OverrideForAndroidSetting ) );
             if ( customImporter.OverrideForiOSSetting.isEditable )
                 audioImporter.SetOverrideSampleSettings( "iOS", SetCustomAudioSettings( customImporter.OverrideForiOSSetting ) );
+
+            if ( customImporter.isLogger )
+                Debug.Log( "CustomAssetImporter: " + customImporter.Log );
         }
 
         /// <summary>

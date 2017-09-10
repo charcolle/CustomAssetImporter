@@ -18,13 +18,25 @@ namespace charcolle.Utility.CustomAssetImporter {
 
         [MenuItem( "Window/Custom Asset Importer/Texture Importer" )]
         static void OpenCustomTextureImporter() {
-            var customAudioImporter = FileHelper.GetTextureImporter();
-            if ( customAudioImporter == null ) {
+            var customTextureImporter = FileHelper.GetTextureImporter();
+            if ( customTextureImporter == null ) {
                 Debug.LogError( "check if this asset's folder is correct." );
                 return;
             }
-            EditorGUIUtility.PingObject( customAudioImporter );
-            Selection.activeObject = customAudioImporter;
+            EditorGUIUtility.PingObject( customTextureImporter );
+            Selection.activeObject = customTextureImporter;
+        }
+
+
+        [MenuItem( "Window/Custom Asset Importer/Model Importer" )]
+        static void OpenCustomModelImporter() {
+            var customModelImporter = FileHelper.GetModelImporter();
+            if ( customModelImporter == null ) {
+                Debug.LogError( "check if this asset's folder is correct." );
+                return;
+            }
+            EditorGUIUtility.PingObject( customModelImporter );
+            Selection.activeObject = customModelImporter;
         }
 
     }

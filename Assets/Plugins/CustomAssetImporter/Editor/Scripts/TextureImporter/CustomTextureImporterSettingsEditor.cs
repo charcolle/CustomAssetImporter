@@ -9,6 +9,9 @@ namespace charcolle.Utility.CustomAssetImporter {
 
         private CustomTextureImporterSettings myTarget;
 
+        private const string TEXT_UNDO = "Change CustomTextureImporter Setting";
+        private const string TEXT_LABEL = "Texture Importer Settings";
+
         private void OnEnable() {
             myTarget = target as CustomTextureImporterSettings;
         }
@@ -23,6 +26,7 @@ namespace charcolle.Utility.CustomAssetImporter {
                 {
                     Header();
                     Main();
+                    Footer();
                 }
                 EditorGUILayout.EndVertical();
                 GUILayout.Space( 3f );
@@ -33,7 +37,7 @@ namespace charcolle.Utility.CustomAssetImporter {
                 EditorGUILayout.HelpBox( "No Importers", MessageType.Warning );
 
             if ( GUI.changed ) {
-                Undo.RegisterCompleteObjectUndo( target, "Change CustomTextureImporter Setting" );
+                Undo.RegisterCompleteObjectUndo( target, TEXT_UNDO );
                 Undo.FlushUndoRecordObjects();
                 EditorUtility.SetDirty( target );
             }
@@ -47,7 +51,7 @@ namespace charcolle.Utility.CustomAssetImporter {
             GUI.backgroundColor = Color.grey;
             EditorGUILayout.BeginHorizontal( CustomAssetImporterStyles.Box );
             {
-                GUILayout.Label( "Texture Importer Settings" );
+                GUILayout.Label( TEXT_LABEL );
                 GUILayout.FlexibleSpace();
                 GUI.backgroundColor = Color.green;
                 if ( GUILayout.Button( "+", CustomAssetImporterStyles.ToolBox, GUILayout.Width( 70f ) ) ) {
@@ -72,6 +76,20 @@ namespace charcolle.Utility.CustomAssetImporter {
             }
             EditorGUILayout.EndScrollView();
         }
+        private void Footer() {
+            if ( myTarget.CustomImporterSettings.Count == 0 )
+                return;
+            EditorGUILayout.BeginHorizontal( CustomAssetImporterStyles.Box );
+            {
+                GUILayout.FlexibleSpace();
+                if ( GUILayout.Button( "Collapse all", EditorStyles.toolbarButton, GUILayout.Width( 120f ) ) ) {
+                    for ( int i = 0; i < myTarget.CustomImporterSettings.Count; i++ ) {
+                        myTarget.CustomImporterSettings[i].isFoldout = false;
+                    }
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+        }
 
         private void ImporterDrawer( CustomTextureImporter importer ) {
             var deleteFlag = false;
@@ -82,8 +100,12 @@ namespace charcolle.Utility.CustomAssetImporter {
                     GUILayout.Label( Path.GetFileNameWithoutExtension( importer.TargetName ) );
                     GUILayout.FlexibleSpace();
                     if ( GUILayout.Button( "ReImport", EditorStyles.toolbarButton, GUILayout.Width( 60f ) ) ) {
-                        ImportPerform( importer );
+                        FileHelper.ReImport( importer );
                     }
+                    // furture
+                    //if ( GUILayout.Button( "Copy", EditorStyles.toolbarButton, GUILayout.Width( 60f ) ) ) {
+                    //    ImportPerform( importer );
+                    //}
                     GUI.backgroundColor = Color.red;
                     if ( GUILayout.Button( "x", EditorStyles.toolbarButton, GUILayout.Width( 20f ) ) ) {
                         deleteFlag = true;
@@ -103,10 +125,21 @@ namespace charcolle.Utility.CustomAssetImporter {
                 }
                 EditorGUILayout.EndHorizontal();
 
+                EditorGUILayout.BeginHorizontal();
+                {
+                    GUILayout.Space( 7f );
+                    importer.isLogger = EditorGUILayout.Toggle( importer.isLogger, GUILayout.Width( 10f ) );
+                    GUILayout.Label( "Show Log", GUILayout.Width( 84f ) );
+                    importer.Log = EditorGUILayout.TextField( importer.Log );
+                }
+                EditorGUILayout.EndHorizontal();
+
                 // drop perform
                 var dropFileName = FileHelper.GetDraggedAssetPath( curEvent, dropArea );
                 if ( !string.IsNullOrEmpty( dropFileName ) )
                     importer.TargetName = dropFileName;
+
+                GUILayout.Space( 5f );
 
                 EditorGUILayout.BeginHorizontal();
                 {
@@ -227,6 +260,8 @@ namespace charcolle.Utility.CustomAssetImporter {
                 if ( !v.FitSize.Value ) {
                     using ( new ImporterValueScope<int>( v.MaxSize, "MaxSize" ) )
                         v.MaxSize.Value = EditorGUILayout.IntPopup( v.MaxSize, TextureImporterHelper.TexutureSizeLabel, TextureImporterHelper.TextureSize );
+                } else {
+                    v.MaxSize.isEditable = false;
                 }
 
                 using ( new ImporterValueScope<TextureImporterCompression>( v.Compression, "Compression" ) )
@@ -246,36 +281,13 @@ namespace charcolle.Utility.CustomAssetImporter {
                 if ( v.UseCrunchCompression.Value ) {
                     using ( new ImporterValueScope<int>( v.CompressionQuality, "CompressorQuality" ) )
                         v.CompressionQuality.Value = EditorGUILayout.IntSlider( v.CompressionQuality, 0, 100 );
+                } else {
+                    v.CompressionQuality.isEditable = false;
                 }
 
             }
             EditorGUILayout.EndVertical();
         }
 
-        private void ImportPerform( CustomTextureImporter importer ) {
-            if ( string.IsNullOrEmpty( importer.TargetName ) )
-                return;
-
-            if ( importer.Type.Equals( ImportTargetType.FilePath ) ) {
-                AssetDatabase.ImportAsset( importer.TargetName, ImportAssetOptions.Default );
-
-            } else if ( importer.Type.Equals( ImportTargetType.FileName ) ) {
-                var files = AssetDatabase.FindAssets( Path.GetFileNameWithoutExtension( importer.TargetName ) );
-                for( int i = 0; i < files.Length; i++ )
-                    AssetDatabase.ImportAsset( AssetDatabase.GUIDToAssetPath( files[i] ), ImportAssetOptions.Default );
-
-            } else if ( importer.Type.Equals( ImportTargetType.DirectoryName ) ) {
-                var dirName = Path.GetFileName( importer.TargetName );
-                var dirs = Directory.GetDirectories( Application.dataPath, dirName, SearchOption.AllDirectories );
-
-                for( int i = 0; i < dirs.Length; i++ ) {
-                    var dirPath = dirs[i].Replace( "\\", "/" ).Replace( Application.dataPath, "Assets" );
-                    AssetDatabase.ImportAsset( dirPath, ImportAssetOptions.ImportRecursive );
-                }
-
-            } else {
-                AssetDatabase.ImportAsset( importer.TargetName, ImportAssetOptions.ImportRecursive );
-            }
-        }
     }
 }
