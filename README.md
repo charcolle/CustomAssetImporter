@@ -1,12 +1,13 @@
-# CustomAssetImporter version0.2.0
+# CustomAssetImporter ver1.0
 This asset is useful to set asset's import settings automatically.
-* Unity Version: 2017.1.0f3
+### Supported Unity Versions
+Unity5.5 or newer
 
-## usage
+## Usage
 Open setting window with
-##### Window > CustomAssetImporter > [Audio/Texuture] Importer
+##### Window > CustomAssetImporter > [Audio/Texuture/Model] Importer
 
-![CustomAssetImporterDemo](https://github.com/charcolle/CustomAssetImporter/blob/master/DescFiles/CustomAssetImporter.gif?raw=true)
+![CustomAssetImporterDemo](https://github.com/charcolle/CustomAssetImporter/blob/master/CustomAssetImporter_Screenshot_v1.0.png?raw=true)
 
 ## Texture Importer
 ...comming soon...
