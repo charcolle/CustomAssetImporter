@@ -5,7 +5,11 @@ namespace charcolle.Utility.CustomAssetImporter {
 
     public class CustomAudioPostprocessor: AssetPostprocessor {
 
-        void OnPreprocessAudio() {
+        void OnPostprocessAudio(AudioClip audio) {
+            Process();
+        }
+
+        private void Process() {
             var customSettings = FileHelper.GetAudioImporter();
             if ( customSettings != null )
                 ImportCustomAudio( customSettings.GetCustomImporter( assetPath ) );
@@ -22,47 +26,52 @@ namespace charcolle.Utility.CustomAssetImporter {
                 return;
 
             AudioImporter audioImporter = assetImporter as AudioImporter;
-            CustomAudioImporterValues customSettings = customImporter.ImporterSetting;
+            CustomAudioImporterSettingValue customSettings = customImporter.ImporterSetting;
 
-            if ( customSettings.ForceToMono.isEditable )
+            if ( customSettings.ForceToMono.IsConfigurable )
                 audioImporter.forceToMono = customSettings.ForceToMono;
 
-            if ( customSettings.LoadInBackGround.isEditable )
+            if ( customSettings.LoadInBackGround.IsConfigurable )
                 audioImporter.loadInBackground = customSettings.LoadInBackGround;
 
-            if ( customSettings.PreloadAudioData.isEditable )
+#if UNITY_2017_1_OR_NEWER
+            if ( customSettings.Ambisonic.IsConfigurable )
+                audioImporter.ambisonic = customSettings.Ambisonic;
+#endif
+
+            if ( customSettings.PreloadAudioData.IsConfigurable )
                 audioImporter.preloadAudioData = customSettings.PreloadAudioData;
 
             audioImporter.defaultSampleSettings = SetCustomAudioSettings( customSettings );
 
             // override settings
-            if ( customImporter.OverrideForAndroidSetting.isEditable )
+            if ( customImporter.OverrideForAndroidSetting.IsConfigurable )
                 audioImporter.SetOverrideSampleSettings( "Android", SetCustomAudioSettings( customImporter.OverrideForAndroidSetting ) );
-            if ( customImporter.OverrideForiOSSetting.isEditable )
+            if ( customImporter.OverrideForiOSSetting.IsConfigurable )
                 audioImporter.SetOverrideSampleSettings( "iOS", SetCustomAudioSettings( customImporter.OverrideForiOSSetting ) );
 
             if ( customImporter.isLogger )
-                Debug.Log( "CustomAssetImporter: " + customImporter.Log );
+                Debug.Log( string.Format( "CustomAudioImporter:" + customImporter.Log + "\nProcessed: {0}", assetPath ) );
         }
 
         /// <summary>
         /// get custom AudioImporterSampleSettings
         /// </summary>
-        private AudioImporterSampleSettings SetCustomAudioSettings( CustomAudioImporterValues customSettings ) {
+        private AudioImporterSampleSettings SetCustomAudioSettings( CustomAudioImporterSettingValue customSettings ) {
             var importerSettings = new AudioImporterSampleSettings();
 
-            if ( customSettings.LoadType.isEditable )
+            if ( customSettings.LoadType.IsConfigurable )
                 importerSettings.loadType = customSettings.LoadType;
 
-            if ( customSettings.CompressionFormat.isEditable )
+            if ( customSettings.CompressionFormat.IsConfigurable )
                 importerSettings.compressionFormat = customSettings.CompressionFormat;
 
             if ( customSettings.CompressionFormat.Value.Equals( AudioCompressionFormat.Vorbis ) ) {
-                if ( customSettings.Quality.isEditable )
+                if ( customSettings.Quality.IsConfigurable )
                     importerSettings.quality = customSettings.Quality / 100f;
             }
 
-            if ( customSettings.SampleRateSetting.isEditable )
+            if ( customSettings.SampleRateSetting.IsConfigurable )
                 importerSettings.sampleRateSetting = customSettings.SampleRateSetting;
 
             return importerSettings;

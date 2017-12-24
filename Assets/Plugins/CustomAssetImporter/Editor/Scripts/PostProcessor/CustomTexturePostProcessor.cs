@@ -8,8 +8,12 @@ namespace charcolle.Utility.CustomAssetImporter {
 
         private Texture2D texture;
 
-        void OnPreprocessTexture() {
+        void OnPostprocessTexture( Texture2D tex ) {
+            texture = tex;
+            Process();
+        }
 
+        private void Process() {
             texture = ( Texture2D )AssetDatabase.LoadAssetAtPath( assetPath, typeof( Texture2D ) );
             var customSettings = FileHelper.GetTextureImporter();
             if ( customSettings != null )
@@ -27,124 +31,150 @@ namespace charcolle.Utility.CustomAssetImporter {
                 return;
 
             TextureImporter textureImporter = assetImporter as TextureImporter;
-            CustomTextureImporterValues customSettings = customImporter.ImporterSetting;
+            CustomTextureImporterSettingValue customSettings = customImporter.ImporterSetting;
             TextureImporterSettings importerSettings = new TextureImporterSettings();
             textureImporter.ReadTextureSettings( importerSettings );
             importerSettings.spriteMode = 1;
 
             // pre setting
-            if ( customSettings.ExtrudeEdges.isEditable )
+            if ( customSettings.ExtrudeEdges.IsConfigurable )
                 importerSettings.spriteExtrude = ( uint )( int )customSettings.ExtrudeEdges;
 
-            if ( customSettings.MeshType.isEditable )
+            if ( customSettings.MeshType.IsConfigurable )
                 importerSettings.spriteMeshType = customSettings.MeshType;
 
-            if ( customSettings.PixelsPerUnit.isEditable )
+            if ( customSettings.PixelsPerUnit.IsConfigurable )
                 importerSettings.spritePixelsPerUnit = customSettings.PixelsPerUnit;
 
             textureImporter.SetTextureSettings( importerSettings );
 
             // common
-            if ( customSettings.TextureType.isEditable )
+            if ( customSettings.TextureType.IsConfigurable )
                 textureImporter.textureType     = customSettings.TextureType;
 
-            if ( customSettings.TextureShape.isEditable )
+            if ( customSettings.TextureShape.IsConfigurable )
                 textureImporter.textureShape = customSettings.TextureShape;
 
-            if ( customSettings.WrapMode.isEditable )
+            if ( customSettings.WrapMode.IsConfigurable )
                 textureImporter.wrapMode = customSettings.WrapMode;
 
-            if ( customSettings.FilterMode.isEditable )
+            if ( customSettings.FilterMode.IsConfigurable )
                 textureImporter.filterMode = customSettings.FilterMode;
 
-            if ( customSettings.AnisoLevel.isEditable )
+            if ( customSettings.AnisoLevel.IsConfigurable )
                 textureImporter.anisoLevel = customSettings.AnisoLevel;
 
-            if ( customSettings.sRGB.isEditable )
+            // advance
+            if ( customSettings.sRGB.IsConfigurable )
                 textureImporter.sRGBTexture = customSettings.sRGB;
 
-            if ( customSettings.AlphaSource.isEditable )
+            if ( customSettings.AlphaSource.IsConfigurable )
                 textureImporter.alphaSource = customSettings.AlphaSource;
 
-            if ( customSettings.AlphaIsTransparency.isEditable )
+            if ( customSettings.AlphaIsTransparency.IsConfigurable )
                 textureImporter.alphaIsTransparency = customSettings.AlphaIsTransparency;
 
-            if ( customSettings.NonPowerOf2.isEditable )
+            if ( customSettings.NonPowerOf2.IsConfigurable )
                 textureImporter.npotScale = customSettings.NonPowerOf2;
 
-            if ( customSettings.ReadWriteEnabled.isEditable )
+            if ( customSettings.ReadWriteEnabled.IsConfigurable )
                 textureImporter.isReadable = customSettings.ReadWriteEnabled;
 
-            if ( customSettings.GenerateMipMaps.isEditable )
+            if ( customSettings.GenerateMipMaps.IsConfigurable ) {
                 textureImporter.mipmapEnabled = customSettings.GenerateMipMaps;
 
+                if ( customSettings.BorderMipMaps.IsConfigurable )
+                    textureImporter.borderMipmap = customSettings.BorderMipMaps;
+
+                if ( customSettings.MipMapFiltering.IsConfigurable )
+                    textureImporter.mipmapFilter = customSettings.MipMapFiltering;
+
+                if ( customSettings.FadeoutMipMaps.IsConfigurable ) {
+                    textureImporter.mipmapFadeDistanceStart = ( int )customSettings.FadeoutStartValue;
+                    textureImporter.mipmapFadeDistanceEnd   = ( int )customSettings.FadeoutEndValue;
+                }
+#if UNITY_2017_1_OR_NEWER
+                if ( customSettings.MipMapsPreserveCover.IsConfigurable ) {
+                    textureImporter.mipMapsPreserveCoverage = customSettings.MipMapsPreserveCover;
+
+                    if ( customSettings.AlphaCutoffValue.IsConfigurable && customSettings.MipMapsPreserveCover.Value )
+                        textureImporter.mipMapBias = customSettings.AlphaCutoffValue;
+                }
+#endif
+            }
+
             // sprite
-            if ( customSettings.PackingTag.isEditable )
+            if ( customSettings.PackingTag.IsConfigurable )
                 textureImporter.spritePackingTag = customSettings.PackingTag;
 
-            if ( customSettings.SpriteMode.isEditable )
+            if ( customSettings.SpriteMode.IsConfigurable )
                 textureImporter.spriteImportMode    = customSettings.SpriteMode;
 
             // normal map
-            // obsolute
-            //if ( customSettings.CreateFromGrayScale.isEditable )
-            //    textureImporter.grayscaleToAlpha = customSettings.CreateFromGrayScale;
+            if( customSettings.CreateFromGrayScale.IsConfigurable ) {
+                //textureImporter.normalmapFilter = TextureImporterNormalFilter.Standard;
+            }
 
             SetCustomTextureSettings( "Default", customSettings, textureImporter );
 
             // override settings
-            if ( customImporter.OverrideForAndroidSetting.isEditable )
+            if ( customImporter.OverrideForAndroidSetting.IsConfigurable )
                 textureImporter.SetPlatformTextureSettings( SetCustomTextureSettings( "Android", customImporter.OverrideForAndroidSetting ) );
-            if ( customImporter.OverrideForiOSSetting.isEditable )
+            if ( customImporter.OverrideForiOSSetting.IsConfigurable )
                 textureImporter.SetPlatformTextureSettings( SetCustomTextureSettings( "iPhone", customImporter.OverrideForiOSSetting ) );
 
             // texture cannot be get at first import
-            if ( texture == null && customSettings.FitSize.Value ) {
-                AssetDatabase.ImportAsset( assetPath );
-                return;
-            }
+            //if ( texture == null && customSettings.FitSize.Value ) {
+            //    AssetDatabase.ImportAsset( assetPath );
+            //    return;
+            //}
 
             if ( customImporter.isLogger )
-                Debug.Log( "CustomAssetImporter: " + customImporter.Log );
+                    Debug.Log( string.Format( "CustomTextureImporter:" + customImporter.Log + "\nProcessed: {0}", assetPath ) );
         }
 
         /// <summary>
         /// get custom AudioImporterSampleSettings
         /// </summary>
-        private TextureImporterPlatformSettings SetCustomTextureSettings( string platform, CustomTextureImporterValues customSettings, TextureImporter importer = null ) {
+        private TextureImporterPlatformSettings SetCustomTextureSettings( string platform, CustomTextureImporterSettingValue customSettings, TextureImporter importer = null ) {
             var platformSettings = new TextureImporterPlatformSettings();
 
             platformSettings.name = platform;
             platformSettings.overridden = true;
 
-            if ( customSettings.FitSize.isEditable && customSettings.FitSize.Value ) {
-                var fitSize = TextureImporterHelper.GetTextureFitSize( texture );
+            if ( customSettings.FitSize.IsConfigurable && customSettings.FitSize.Value ) {
+                var fitSize = TextureImporterHelper.GetTextureFitSize( texture, importer );
                 if ( fitSize != 0 ) {
                     platformSettings.maxTextureSize = fitSize;
                     if ( importer != null )
                         importer.maxTextureSize = fitSize;
                 }
             } else {
-                if ( customSettings.MaxSize.isEditable ) {
+                if ( customSettings.MaxSize.IsConfigurable ) {
                     platformSettings.maxTextureSize = customSettings.MaxSize;
                     if( importer != null )
                         importer.maxTextureSize = customSettings.MaxSize;
                 }
             }
 
-            if ( customSettings.Compression.isEditable ) {
+#if UNITY_2017_2_OR_NEWER
+            if ( customSettings.ResizeAlgorithm.IsConfigurable )
+                platformSettings.resizeAlgorithm = customSettings.ResizeAlgorithm;
+#endif
+
+            if ( customSettings.Compression.IsConfigurable ) {
                 platformSettings.textureCompression = customSettings.Compression;
                 if ( importer != null )
                     importer.textureCompression = customSettings.Compression;
             }
 
-            if ( customSettings.UseCrunchCompression.isEditable ) {
+            if ( customSettings.UseCrunchCompression.IsConfigurable ) {
                 platformSettings.crunchedCompression = customSettings.UseCrunchCompression;
                 if ( importer != null )
                     importer.crunchedCompression = customSettings.UseCrunchCompression;
             }
 
-            if ( customSettings.Format.isEditable ) {
+            if ( customSettings.Format.IsConfigurable ) {
                 platformSettings.format = customSettings.Format;
                 // obsolute
                 //if ( importer != null )
@@ -152,7 +182,7 @@ namespace charcolle.Utility.CustomAssetImporter {
             }
 
             if ( customSettings.UseCrunchCompression.Value ) {
-                if ( customSettings.CompressionQuality.isEditable ) {
+                if ( customSettings.CompressionQuality.IsConfigurable ) {
                     platformSettings.compressionQuality = customSettings.CompressionQuality;
                     if ( importer != null )
                         importer.compressionQuality = customSettings.CompressionQuality;

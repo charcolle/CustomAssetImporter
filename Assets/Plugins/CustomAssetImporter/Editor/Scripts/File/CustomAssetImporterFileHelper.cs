@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System.IO;
+using System.Linq;
 
 namespace charcolle.Utility.CustomAssetImporter {
 
@@ -23,6 +24,7 @@ namespace charcolle.Utility.CustomAssetImporter {
             var asset = FindAssetByType<CustomAudioImporterSettings>( SEARCH_AUDIOIMPORTER_KEY );
             if ( asset == null )
                 asset = CreateCustomAudioImporterSetting();
+            asset.ImporterName = "AudioImporter";
             return asset;
         }
 
@@ -34,6 +36,7 @@ namespace charcolle.Utility.CustomAssetImporter {
             var asset = FindAssetByType<CustomTextureImporterSettings>( SEARCH_TEXTUREIMPORTER_KEY );
             if ( asset == null )
                 asset = CreateCustomTextureImporterSetting();
+            asset.ImporterName = "TextureImporter";
             return asset;
         }
 
@@ -45,6 +48,7 @@ namespace charcolle.Utility.CustomAssetImporter {
             var asset = FindAssetByType<CustomModelImporterSettings>( SEARCH_MODELIMPORTER_KEY );
             if ( asset == null )
                 asset = CreateCustomModelImporterSetting();
+            asset.ImporterName = "ModelImporter";
             return asset;
         }
 
@@ -171,30 +175,62 @@ namespace charcolle.Utility.CustomAssetImporter {
         //=============================================================================
         // Importer
         //=============================================================================
+
         public static void ReImport<T>( CustomImporterClass<T> importer ) {
-            if ( string.IsNullOrEmpty( importer.TargetName ) )
+            if ( string.IsNullOrEmpty( importer.Target ) )
                 return;
 
-            if ( importer.Type.Equals( ImportTargetType.FilePath ) ) {
-                AssetDatabase.ImportAsset( importer.TargetName, ImportAssetOptions.Default );
+            switch ( importer.Type ) {
+                case ImportTargetType.FilePath:
+                    AssetDatabase.ImportAsset( importer.Target, ImportAssetOptions.Default );
+                    break;
 
-            } else if ( importer.Type.Equals( ImportTargetType.FileName ) ) {
-                var files = AssetDatabase.FindAssets( Path.GetFileNameWithoutExtension( importer.TargetName ) );
-                for ( int i = 0; i < files.Length; i++ )
-                    AssetDatabase.ImportAsset( AssetDatabase.GUIDToAssetPath( files[i] ), ImportAssetOptions.Default );
+                case ImportTargetType.FileName:
+                    {
+                        var files = AssetDatabase.FindAssets( Path.GetFileNameWithoutExtension( importer.Target ) );
+                        for ( int i = 0; i < files.Length; i++ ) {
+                            var assetPath = AssetDatabase.GUIDToAssetPath( files[i] );
+                            if ( Path.GetFileNameWithoutExtension( assetPath ).Equals( Path.GetFileNameWithoutExtension( importer.Target ) ) )
+                                AssetDatabase.ImportAsset( AssetDatabase.GUIDToAssetPath( files[i] ), ImportAssetOptions.Default );
+                        }
+                    }
+                    break;
 
-            } else if ( importer.Type.Equals( ImportTargetType.DirectoryName ) ) {
-                var dirName = Path.GetFileName( importer.TargetName );
-                var dirs = Directory.GetDirectories( Application.dataPath, dirName, SearchOption.AllDirectories );
+                case ImportTargetType.DirectoryPath:
+                    {
+                        var files = Directory.GetFiles( importer.Target );
+                        files = files.Where( f => !Path.GetExtension( f ).Equals( ".meta" ) ).ToArray();
+                        for ( int i = 0; i < files.Length; i++ ) {
+                            var assetPath = getRelativeAssetPath( files[i] );
+                            if( !string.IsNullOrEmpty( assetPath ) )
+                                AssetDatabase.ImportAsset( assetPath, ImportAssetOptions.Default );
+                        }
+                    }
+                    break;
 
-                for ( int i = 0; i < dirs.Length; i++ ) {
-                    var dirPath = dirs[i].Replace( "\\", "/" ).Replace( Application.dataPath, "Assets" );
-                    AssetDatabase.ImportAsset( dirPath, ImportAssetOptions.ImportRecursive );
-                }
-
-            } else {
-                AssetDatabase.ImportAsset( importer.TargetName, ImportAssetOptions.ImportRecursive );
+                default:
+                    {
+                        //var files = Directory.GetFiles( importer.Target, "*", SearchOption.AllDirectories );
+                        //files = files.Where( f => !Path.GetExtension( f ).Equals( ".meta" ) ).Distinct().ToArray();
+                        //for ( int i = 0; i < files.Length; i++ ) {
+                        //    var assetPath = getRelativeAssetPath( files[i] );
+                        //    if ( !string.IsNullOrEmpty( assetPath ) )
+                        //        AssetDatabase.ImportAsset( assetPath, ImportAssetOptions.Default );
+                        //}
+                        AssetDatabase.ImportAsset( importer.Target, ImportAssetOptions.ImportRecursive );
+                    }
+                    break;
             }
+        }
+
+        private static string getRelativeAssetPath( string systemPath ) {
+            return pathSlashFix( systemPath.Replace( Application.dataPath, "Assets/" ) );
+        }
+
+        private const string forwardSlash   = "/";
+        private const string backSlash      = "\\";
+        private static string pathSlashFix( string path ) {
+            return path.Replace( backSlash, forwardSlash );
         }
 
     }
