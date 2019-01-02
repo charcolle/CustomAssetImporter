@@ -15,12 +15,12 @@ Unity2017.1 or newer
 - Directory Name：該当するディレクトリ名にあるファイルに対して設定を行います  
 - File Path：設定したファイルのパスに対して設定を行います  
 - File Name：該当するファイル名すべてに対して設定を行います  
-![CustomAssetImporterTargetType](https://github.com/charcolle/CustomAssetImporter/blob/master/DescFiles/customassetimporter_targettype_screenshot.png?raw=true)
+![CustomAssetImporterTargetType](https://github.com/charcolle/CustomAssetImporter/blob/master/DescFiles/customassetimporter_targettype_screenshot.png?raw=true)  
 4. ImportSettings設定を反映させたい対象を設定します。ディレクトリまたはファイルをドラッグ＆ドロップすることで簡単に設定することができます。
-
+  
 ### Texture Importer
-![CustomAssetImporterTexture](https://github.com/charcolle/CustomAssetImporter/blob/master/DescFiles/customassetimporter_texture_screenshot.png?raw=true)
+![CustomAssetImporterTexture](https://github.com/charcolle/CustomAssetImporter/blob/master/DescFiles/customassetimporter_texture_screenshot.png?raw=true)  
 ### Audio Imorter
-![CustomAssetImporterAudio](https://github.com/charcolle/CustomAssetImporter/blob/master/DescFiles/customassetimporter_screenshot.png?raw=true)
+![CustomAssetImporterAudio](https://github.com/charcolle/CustomAssetImporter/blob/master/DescFiles/customassetimporter_screenshot.png?raw=true)  
 ### Model Imorter
-![CustomAssetImporterModel](https://github.com/charcolle/CustomAssetImporter/blob/master/DescFiles/customassetimporter_model_screenshot.png?raw=true)
+![CustomAssetImporterModel](https://github.com/charcolle/CustomAssetImporter/blob/master/DescFiles/customassetimporter_model_screenshot.png?raw=true)  
