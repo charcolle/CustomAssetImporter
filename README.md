@@ -2,6 +2,7 @@
   
 # CustomAssetImporter ver2.0
 This asset is useful to set asset's import settings automatically.  
+Get the package from [here](https://github.com/charcolle/CustomAssetImporter/releases)  
 ### Supported Unity Versions
 Unity2017.1 or newer
 
