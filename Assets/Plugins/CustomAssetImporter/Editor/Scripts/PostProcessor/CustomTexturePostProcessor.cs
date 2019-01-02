@@ -27,12 +27,12 @@ namespace charcolle.Utility.CustomAssetImporter {
         /// set importer
         /// </summary>
         private void ImportCustomAudio( CustomTextureImporter customImporter ) {
-            if ( customImporter == null )
+            if ( customImporter == null || !customImporter.IsEnable )
                 return;
 
-            TextureImporter textureImporter = assetImporter as TextureImporter;
+            TextureImporter textureImporter                  = assetImporter as TextureImporter;
             CustomTextureImporterSettingValue customSettings = customImporter.ImporterSetting;
-            TextureImporterSettings importerSettings = new TextureImporterSettings();
+            TextureImporterSettings importerSettings         = new TextureImporterSettings();
             textureImporter.ReadTextureSettings( importerSettings );
             importerSettings.spriteMode = 1;
 
@@ -129,7 +129,7 @@ namespace charcolle.Utility.CustomAssetImporter {
             //    return;
             //}
 
-            if ( customImporter.isLogger )
+            if ( customImporter.IsLogger )
                     Debug.Log( string.Format( "CustomTextureImporter:" + customImporter.Log + "\nProcessed: {0}", assetPath ) );
         }
 

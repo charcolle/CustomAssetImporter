@@ -1,0 +1,11 @@
+{
+  "name": "com.charcolle.customassetimporter",
+  "displayName": "CustomAssetImporter",
+  "version": "2.0.0",
+  "unity": "2018.3",
+  "description": "This asset is useful to set asset's import settings automatically.",
+  "keywords": [ "editorextensions", "utilities", "importer", "customassetimporter" ],
+  "category": "editorextensions",
+  "dependencies": {
+  }
+}

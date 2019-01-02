@@ -4,8 +4,11 @@ using System;
 
 namespace charcolle.Utility.CustomAssetImporter {
 
+    /// <summary>
+    /// CustomImporterClass of audio.
+    /// </summary>
     [Serializable]
-    public class CustomAudioImporter: CustomImporterClass<CustomAudioImporterValue> {
+    internal class CustomAudioImporter: CustomImporterClass<CustomAudioImporterValue> {
 
         public CustomAudioImporter() {
             ImporterSetting             = new CustomAudioImporterValue( true );
@@ -19,44 +22,40 @@ namespace charcolle.Utility.CustomAssetImporter {
             OverrideForiOSSetting     = new CustomAudioImporterValue( copy.OverrideForiOSSetting );
         }
 
-        public override void Draw() {
-            EditorGUILayout.BeginHorizontal();
-            {
-                GUILayout.Space( 20f );
-                isFoldout = EditorGUILayout.Foldout( isFoldout, "Show Setting" );
-            }
-            EditorGUILayout.EndHorizontal();
-
-            if ( isFoldout ) {
-                ImporterSetting.Value.Draw( true );
-                GUILayout.Space( 3f );
-                OverrideForiOSSetting.IsConfigurable = EditorGUILayout.Toggle( "iOS Setting", OverrideForiOSSetting.IsConfigurable );
-                if ( OverrideForiOSSetting.IsConfigurable )
-                    OverrideForiOSSetting.Value.Draw( false );
-                OverrideForAndroidSetting.IsConfigurable = EditorGUILayout.Toggle( "Android Setting", OverrideForAndroidSetting.IsConfigurable );
-                if ( OverrideForAndroidSetting.IsConfigurable )
-                    OverrideForAndroidSetting.Value.Draw( false );
+        public static CustomAudioImporter Root {
+            get {
+                return new CustomAudioImporter {
+                    name = "",
+                    depth = -1,
+                    id = 0
+                };
             }
         }
     }
 
+    /// <summary>
+    /// CustomAudioImporterValue has a importerValue for each platforms.
+    /// </summary>
     [Serializable]
-    public class CustomAudioImporterValue: ImporterValue<CustomAudioImporterSettingValue> {
+    internal class CustomAudioImporterValue: ImporterValue<CustomAudioImporterSettingValue> {
 
         public CustomAudioImporterValue( bool editable ) {
             IsConfigurable  = editable;
-            Value       = new CustomAudioImporterSettingValue();
+            Value           = new CustomAudioImporterSettingValue();
         }
 
         public CustomAudioImporterValue( CustomAudioImporterValue copy ) {
             IsConfigurable  = copy.IsConfigurable;
-            Value       = new CustomAudioImporterSettingValue( copy.Value );
+            Value           = new CustomAudioImporterSettingValue( copy.Value );
         }
 
     }
 
+    /// <summary>
+    /// CustomAudioImporterSettingValue is a setting of audio importer.
+    /// </summary>
     [Serializable]
-    public class CustomAudioImporterSettingValue {
+    internal class CustomAudioImporterSettingValue {
 
         // common settings
         public ImporterBoolValue ForceToMono;
@@ -71,8 +70,10 @@ namespace charcolle.Utility.CustomAssetImporter {
         public ImporterAudioCompressionValue CompressionFormat;
         public ImporterFloatValue Quality;
         public ImporterSampleRateValue SampleRateSetting;
+        public ImporterIntValue SampleRate;
 
         #region constructor
+
         public CustomAudioImporterSettingValue() {
             ForceToMono         = new ImporterBoolValue();
             LoadInBackGround    = new ImporterBoolValue();
@@ -85,6 +86,8 @@ namespace charcolle.Utility.CustomAssetImporter {
             CompressionFormat   = new ImporterAudioCompressionValue();
             Quality             = new ImporterFloatValue();
             SampleRateSetting   = new ImporterSampleRateValue();
+            SampleRate          = new ImporterIntValue();
+            SampleRate.Value    = 44100;
         }
 
         public CustomAudioImporterSettingValue( CustomAudioImporterSettingValue copy ) {
@@ -99,47 +102,10 @@ namespace charcolle.Utility.CustomAssetImporter {
             CompressionFormat   = new ImporterAudioCompressionValue( copy.CompressionFormat );
             Quality             = new ImporterFloatValue( copy.Quality );
             SampleRateSetting   = new ImporterSampleRateValue( copy.SampleRateSetting );
+            SampleRate          = new ImporterIntValue( copy.SampleRate );
+
         }
-        #endregion
-
-        #region drawer
-        public void Draw( bool isDefault ) {
-            EditorGUILayout.BeginVertical( EditorStyles.helpBox );
-            {
-                if ( isDefault ) {
-                    using ( new ImporterValueScope<bool>( ForceToMono, "ForceToMono" ) )
-                        ForceToMono.Value = EditorGUILayout.Toggle( ForceToMono );
-
-                    using ( new ImporterValueScope<bool>( LoadInBackGround, "LoadInBackGround" ) )
-                        LoadInBackGround.Value = EditorGUILayout.Toggle( LoadInBackGround );
-
-#if UNITY_2017_1_OR_NEWER
-                    using ( new ImporterValueScope<bool>( Ambisonic, "Ambisonic" ) )
-                        Ambisonic.Value = EditorGUILayout.Toggle( Ambisonic );
-#endif
-                }
-
-                using ( new ImporterValueScope<AudioClipLoadType>( LoadType, "LoadType" ) )
-                    LoadType.Value = ( AudioClipLoadType )EditorGUILayout.EnumPopup( LoadType );
-
-                using ( new ImporterValueScope<bool>( PreloadAudioData, "PreloadAudioData" ) )
-                    PreloadAudioData.Value = EditorGUILayout.Toggle( PreloadAudioData );
-
-                using ( new ImporterValueScope<AudioCompressionFormat>( CompressionFormat, "CompressionFormat" ) )
-                    CompressionFormat.Value = ( AudioCompressionFormat )EditorGUILayout.EnumPopup( CompressionFormat );
-
-                if ( CompressionFormat.Value.Equals( AudioCompressionFormat.Vorbis ) ) {
-                    using ( new ImporterValueScope<float>( Quality, "Quality" ) )
-                        Quality.Value = EditorGUILayout.Slider( Quality, 0f, 100f );
-                }
-
-                using ( new ImporterValueScope<AudioSampleRateSetting>( SampleRateSetting, "SampleRateSetting" ) )
-                    SampleRateSetting.Value = ( AudioSampleRateSetting )EditorGUILayout.EnumPopup( SampleRateSetting );
-
-            }
-            EditorGUILayout.EndVertical();
-        }
-        #endregion
+#endregion
 
     }
 

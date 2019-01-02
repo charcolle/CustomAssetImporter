@@ -5,7 +5,7 @@ using System;
 namespace charcolle.Utility.CustomAssetImporter {
 
     [Serializable]
-    public class CustomTextureImporter: CustomImporterClass<CustomTextureImporterValue> {
+    internal class CustomTextureImporter: CustomImporterClass<CustomTextureImporterValue> {
 
         public CustomTextureImporter() {
             ImporterSetting             = new CustomTextureImporterValue( true );
@@ -19,45 +19,37 @@ namespace charcolle.Utility.CustomAssetImporter {
             OverrideForiOSSetting       = new CustomTextureImporterValue( copy.OverrideForiOSSetting );
         }
 
-        public override void Draw() {
-            EditorGUILayout.BeginHorizontal();
-            {
-                GUILayout.Space( 20f );
-                isFoldout = EditorGUILayout.Foldout( isFoldout, "Show Setting" );
-            }
-            EditorGUILayout.EndHorizontal();
-
-            if ( isFoldout ) {
-                ImporterSetting.Value.Draw( true );
-                GUILayout.Space( 3f );
-                OverrideForiOSSetting.IsConfigurable = EditorGUILayout.Toggle( "iOS Setting", OverrideForiOSSetting.IsConfigurable );
-                if ( OverrideForiOSSetting.IsConfigurable )
-                    OverrideForiOSSetting.Value.Draw( false );
-                OverrideForAndroidSetting.IsConfigurable = EditorGUILayout.Toggle( "Android Setting", OverrideForAndroidSetting.IsConfigurable );
-                if ( OverrideForAndroidSetting.IsConfigurable )
-                    OverrideForAndroidSetting.Value.Draw( false );
+        public static CustomTextureImporter Root {
+            get {
+                return new CustomTextureImporter {
+                    name = "",
+                    depth = -1,
+                    id = 0
+                };
             }
         }
 
     }
 
     [Serializable]
-    public class CustomTextureImporterValue: ImporterValue<CustomTextureImporterSettingValue> {
+    internal class CustomTextureImporterValue: ImporterValue<CustomTextureImporterSettingValue> {
 
         public CustomTextureImporterValue( bool editable ) {
             IsConfigurable  = editable;
-            Value       = new CustomTextureImporterSettingValue();
+            Value           = new CustomTextureImporterSettingValue();
         }
 
         public CustomTextureImporterValue( CustomTextureImporterValue copy ) {
             IsConfigurable = copy.IsConfigurable;
-            Value      = new CustomTextureImporterSettingValue( copy.Value );
+            Value          = new CustomTextureImporterSettingValue( copy.Value );
         }
+
     }
 
     [Serializable]
-    public class CustomTextureImporterSettingValue {
+    internal class CustomTextureImporterSettingValue {
 
+        // 35
         // common settings
         public ImporterTextureTypeValue TextureType;
         public ImporterTextureShapeValue TextureShape;
@@ -157,6 +149,7 @@ namespace charcolle.Utility.CustomAssetImporter {
             PackingTag               = new ImporterStringValue();
             PixelsPerUnit            = new ImporterIntValue();
             PixelsPerUnit.Value      = 100;
+            ExtrudeEdges             = new ImporterIntValue();
             Pivot                    = new ImporterSpritePivotValue();
 
             sRGB                     = new ImporterBoolValue();
@@ -203,6 +196,7 @@ namespace charcolle.Utility.CustomAssetImporter {
             MeshType             = new ImporterSpriteMeshTypeValue( copy.MeshType );
             PackingTag           = new ImporterStringValue( copy.PackingTag );
             PixelsPerUnit        = new ImporterIntValue( copy.PixelsPerUnit );
+            ExtrudeEdges         = new ImporterIntValue( copy.ExtrudeEdges );
             Pivot                = new ImporterSpritePivotValue( copy.Pivot );
 
             sRGB                 = new ImporterBoolValue( copy.sRGB );
@@ -212,238 +206,6 @@ namespace charcolle.Utility.CustomAssetImporter {
             CreateFromGrayScale  = new ImporterBoolValue( copy.CreateFromGrayScale );
 
             LightType            = new ImporterLightTypeValue( copy.LightType );
-        }
-
-        public void Draw( bool isDefault ) {
-            EditorGUILayout.BeginVertical( EditorStyles.helpBox );
-            {
-                if ( isDefault ) {
-                    var preValue = TextureType.Value;
-                    var preState = TextureType.IsConfigurable;
-                    using ( new ImporterValueScope<TextureImporterType>( TextureType, "TextureType" ) )
-                        TextureType.Value = ( TextureImporterType )EditorGUILayout.EnumPopup( TextureType );
-                    checkTextureTypeChange( preValue, preState );
-
-                    using ( new ImporterValueScope<TextureImporterShape>( TextureShape, "TextureShape" ) )
-                        TextureShape.Value = ( TextureImporterShape )EditorGUILayout.EnumPopup( TextureShape );
-
-                    using ( new ImporterValueScope<TextureWrapMode>( WrapMode, "WrapMode" ) )
-                        WrapMode.Value = ( TextureWrapMode )EditorGUILayout.EnumPopup( WrapMode );
-
-                    using ( new ImporterValueScope<FilterMode>( FilterMode, "FilterMode" ) )
-                        FilterMode.Value = ( FilterMode )EditorGUILayout.EnumPopup( FilterMode );
-
-                    using ( new ImporterValueScope<int>( AnisoLevel, "AnisoLevel" ) )
-                        AnisoLevel.Value = EditorGUILayout.IntSlider( AnisoLevel, 0, 16 );
-
-                    GUILayout.Space( 5f );
-
-                    switch ( TextureType.Value ) {
-                        case TextureImporterType.Default:
-                            using ( new ImporterValueScope<bool>( sRGB, "sRGB" ) )
-                                sRGB.Value = EditorGUILayout.Toggle( sRGB );
-
-                            using ( new ImporterValueScope<TextureImporterAlphaSource>( AlphaSource, "AlphaSource" ) )
-                                AlphaSource.Value = ( TextureImporterAlphaSource )EditorGUILayout.EnumPopup( AlphaSource );
-
-                            using ( new ImporterValueScope<bool>( AlphaIsTransparency, "AlphaIsTransparency" ) )
-                                AlphaIsTransparency.Value = EditorGUILayout.Toggle( AlphaIsTransparency );
-
-                            break;
-                        case TextureImporterType.NormalMap: // cannot find importsetting... :(
-                            //using ( new ImporterValueScope<bool>( CreateFromGrayScale, "CreateFromGrayScale" ) )
-                            //    CreateFromGrayScale.Value = EditorGUILayout.Toggle( CreateFromGrayScale );
-                            break;
-                        case TextureImporterType.Sprite:
-                            using ( new ImporterValueScope<SpriteImportMode>( SpriteMode, "SpriteMode" ) )
-                                SpriteMode.Value = ( SpriteImportMode )EditorGUILayout.EnumPopup( SpriteMode );
-
-                            using ( new ImporterValueScope<SpriteMeshType>( MeshType, "MeshType" ) )
-                                MeshType.Value = ( SpriteMeshType )EditorGUILayout.EnumPopup( MeshType );
-
-                            using ( new ImporterValueScope<string>( PackingTag, "PackingTag" ) )
-                                PackingTag.Value = EditorGUILayout.TextField( PackingTag );
-
-                            using ( new ImporterValueScope<int>( PixelsPerUnit, "PixelsPerUnit" ) )
-                                PixelsPerUnit.Value = EditorGUILayout.IntField( PixelsPerUnit );
-
-                            using ( new ImporterValueScope<int>( ExtrudeEdges, "ExtrudeEdges" ) )
-                                ExtrudeEdges.Value = EditorGUILayout.IntSlider( ExtrudeEdges, 0, 32 );
-
-                            //using ( new ImporterValueScope<PivotMode>( Pivot, "Pivot" ) )
-                            //    Pivot.Value = ( PivotMode )EditorGUILayout.EnumPopup( Pivot );
-                            break;
-                        case TextureImporterType.Cookie:
-                            using ( new ImporterValueScope<LightType>( LightType, "LightType" ) )
-                                LightType.Value = ( LightType )EditorGUILayout.EnumPopup( LightType );
-
-                            using ( new ImporterValueScope<TextureImporterAlphaSource>( AlphaSource, "AlphaSource" ) )
-                                AlphaSource.Value = ( TextureImporterAlphaSource )EditorGUILayout.EnumPopup( AlphaSource );
-
-                            using ( new ImporterValueScope<bool>( AlphaIsTransparency, "AlphaIsTransparency" ) )
-                                AlphaIsTransparency.Value = EditorGUILayout.Toggle( AlphaIsTransparency );
-                            break;
-                        case TextureImporterType.SingleChannel:
-                            using ( new ImporterValueScope<TextureImporterAlphaSource>( AlphaSource, "AlphaSource" ) )
-                                AlphaSource.Value = ( TextureImporterAlphaSource )EditorGUILayout.EnumPopup( AlphaSource );
-
-                            using ( new ImporterValueScope<bool>( AlphaIsTransparency, "AlphaIsTransparency" ) )
-                                AlphaIsTransparency.Value = EditorGUILayout.Toggle( AlphaIsTransparency );
-                            break;
-                        default:
-                            break;
-                    }
-
-                    GUILayout.Space( 5f );
-
-                    //! advance settings
-                    EditorGUILayout.BeginHorizontal();
-                    {
-                        GUILayout.Space( 20f );
-                        isAdvanced = EditorGUILayout.Foldout( isAdvanced, "Advanced" );
-                    }
-                    EditorGUILayout.EndHorizontal();
-
-                    if ( isAdvanced ) {
-                        EditorGUILayout.BeginHorizontal();
-                        {
-                            GUILayout.Space( 10f );
-                            EditorGUILayout.BeginVertical();
-                            {
-
-                                switch ( TextureType.Value ) {
-                                    case TextureImporterType.Sprite:
-                                        using ( new ImporterValueScope<bool>( sRGB, "sRGB" ) )
-                                            sRGB.Value = EditorGUILayout.Toggle( sRGB );
-
-                                        using ( new ImporterValueScope<TextureImporterAlphaSource>( AlphaSource, "AlphaSource" ) )
-                                            AlphaSource.Value = ( TextureImporterAlphaSource )EditorGUILayout.EnumPopup( AlphaSource );
-
-                                        using ( new ImporterValueScope<bool>( AlphaIsTransparency, "AlphaIsTransparency" ) )
-                                            AlphaIsTransparency.Value = EditorGUILayout.Toggle( AlphaIsTransparency );
-                                        break;
-                                    case TextureImporterType.GUI:
-                                        using ( new ImporterValueScope<TextureImporterAlphaSource>( AlphaSource, "AlphaSource" ) )
-                                            AlphaSource.Value = ( TextureImporterAlphaSource )EditorGUILayout.EnumPopup( AlphaSource );
-
-                                        using ( new ImporterValueScope<bool>( AlphaIsTransparency, "AlphaIsTransparency" ) )
-                                            AlphaIsTransparency.Value = EditorGUILayout.Toggle( AlphaIsTransparency );
-                                        break;
-                                }
-
-                                using ( new ImporterValueScope<bool>( ReadWriteEnabled, "ReadWriteEnabled" ) )
-                                    ReadWriteEnabled.Value = EditorGUILayout.Toggle( ReadWriteEnabled );
-
-                                using ( new ImporterValueScope<TextureImporterNPOTScale>( NonPowerOf2, "NonPowerOf2" ) )
-                                    NonPowerOf2.Value = ( TextureImporterNPOTScale )EditorGUILayout.EnumPopup( NonPowerOf2 );
-
-                                using ( new ImporterValueScope<bool>( GenerateMipMaps, "GenerateMipMaps" ) )
-                                    GenerateMipMaps.Value = EditorGUILayout.Toggle( GenerateMipMaps );
-
-                                if ( GenerateMipMaps.IsConfigurable && GenerateMipMaps.Value ) {
-                                    using ( new ImporterValueScope<bool>( BorderMipMaps, "BorderMipMaps" ) )
-                                        BorderMipMaps.Value = EditorGUILayout.Toggle( BorderMipMaps );
-
-                                    using ( new ImporterValueScope<TextureImporterMipFilter>( MipMapFiltering, "MipMapFiltering" ) )
-                                        MipMapFiltering.Value = ( TextureImporterMipFilter )EditorGUILayout.EnumPopup( MipMapFiltering );
-
-#if UNITY_2017_1_OR_NEWER
-                                    using ( new ImporterValueScope<bool>( MipMapsPreserveCover, "MipMapsPreserveCover" ) )
-                                        MipMapsPreserveCover.Value = EditorGUILayout.Toggle( MipMapsPreserveCover );
-                                    if ( MipMapsPreserveCover.Value ) {
-                                        using ( new ImporterValueScope<float>( AlphaCutoffValue, "AlphaCutoffValue" ) )
-                                            AlphaCutoffValue.Value = EditorGUILayout.Slider( AlphaCutoffValue, 0, 1f );
-                                    } else {
-                                        AlphaCutoffValue.IsConfigurable = false;
-                                    }
-#endif
-                                    using ( new ImporterValueScope<bool>( FadeoutMipMaps, "FadeoutMipMaps" ) )
-                                        FadeoutMipMaps.Value = EditorGUILayout.Toggle( FadeoutMipMaps );
-                                    if ( FadeoutMipMaps.Value ) {
-                                        FadeoutStartValue.IsConfigurable = true;
-                                        FadeoutEndValue.IsConfigurable = true;
-                                        EditorGUILayout.MinMaxSlider( ref FadeoutStartValue.Value, ref FadeoutEndValue.Value, 0, 10 );
-                                        FadeoutStartValue.Value = ( int )FadeoutStartValue;
-                                        FadeoutEndValue.Value = ( int )FadeoutEndValue;
-                                    } else {
-                                        FadeoutStartValue.IsConfigurable = false;
-                                        FadeoutEndValue.IsConfigurable = false;
-                                    }
-
-                                } else {
-                                    BorderMipMaps.IsConfigurable = false;
-                                    MipMapFiltering.IsConfigurable = false;
-                                    FadeoutMipMaps.IsConfigurable = false;
-                                    FadeoutStartValue.IsConfigurable = false;
-                                    FadeoutEndValue.IsConfigurable = false;
-#if UNITY_2017_1_OR_NEWER
-                                    MipMapsPreserveCover.IsConfigurable = false;
-                                    AlphaCutoffValue.IsConfigurable = false;
-#endif
-                                }
-                            }
-                            EditorGUILayout.EndVertical();
-                        }
-                        EditorGUILayout.EndHorizontal();
-                    }
-
-                    GUILayout.Space( 5f );
-                }
-
-                //! platform setting
-                using ( new ImporterValueScope<bool>( FitSize, "FitSize" ) )
-                    FitSize.Value = EditorGUILayout.Toggle( FitSize );
-
-                if ( !FitSize.Value ) {
-                    using ( new ImporterValueScope<int>( MaxSize, "MaxSize" ) )
-                        MaxSize.Value = EditorGUILayout.IntPopup( MaxSize, TextureImporterHelper.TexutureSizeLabel, TextureImporterHelper.TextureSize );
-                } else {
-                    MaxSize.IsConfigurable = false;
-                }
-
-#if UNITY_2017_2_OR_NEWER
-                using ( new ImporterValueScope<TextureResizeAlgorithm>( ResizeAlgorithm, "ResizeAlgorithm" ) )
-                    ResizeAlgorithm.Value = ( TextureResizeAlgorithm )EditorGUILayout.EnumPopup( ResizeAlgorithm );
-#endif
-
-                using ( new ImporterValueScope<TextureImporterCompression>( Compression, "Compression" ) )
-                    Compression.Value = ( TextureImporterCompression )EditorGUILayout.EnumPopup( Compression );
-
-                if ( !isDefault ) {
-                    using ( new ImporterValueScope<bool>( AllowAlphaSplitting, "AllowAlphaSplitting" ) )
-                        AllowAlphaSplitting.Value = EditorGUILayout.Toggle( AllowAlphaSplitting );
-                }
-
-                using ( new ImporterValueScope<TextureImporterFormat>( Format, "Format" ) )
-                    Format.Value = ( TextureImporterFormat )EditorGUILayout.EnumPopup( Format );
-
-                using ( new ImporterValueScope<bool>( UseCrunchCompression, "UseCrunchCompression" ) )
-                    UseCrunchCompression.Value = EditorGUILayout.Toggle( UseCrunchCompression );
-
-                if ( UseCrunchCompression.Value ) {
-                    using ( new ImporterValueScope<int>( CompressionQuality, "CompressorQuality" ) )
-                        CompressionQuality.Value = EditorGUILayout.IntSlider( CompressionQuality, 0, 100 );
-                } else {
-                    CompressionQuality.IsConfigurable = false;
-                }
-
-            }
-            EditorGUILayout.EndVertical();
-        }
-
-        private void checkTextureTypeChange( TextureImporterType preValue, bool preEditable ) {
-            if ( preValue == TextureType && preEditable == TextureType.IsConfigurable )
-                return;
-
-            switch ( TextureType.Value ) {
-                case TextureImporterType.Default:
-                case TextureImporterType.NormalMap:
-                    GenerateMipMaps.Value = true;
-                    break;
-                case TextureImporterType.Sprite:
-                    GenerateMipMaps.Value = false;
-                    break;
-            }
         }
 
     }

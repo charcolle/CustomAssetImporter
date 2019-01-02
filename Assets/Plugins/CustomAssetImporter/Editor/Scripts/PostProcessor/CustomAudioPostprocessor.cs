@@ -22,7 +22,7 @@ namespace charcolle.Utility.CustomAssetImporter {
         /// set importer
         /// </summary>
         private void ImportCustomAudio( CustomAudioImporter customImporter ) {
-            if ( customImporter == null )
+            if ( customImporter == null || !customImporter.IsEnable )
                 return;
 
             AudioImporter audioImporter = assetImporter as AudioImporter;
@@ -45,13 +45,18 @@ namespace charcolle.Utility.CustomAssetImporter {
             audioImporter.defaultSampleSettings = SetCustomAudioSettings( customSettings );
 
             // override settings
-            if ( customImporter.OverrideForAndroidSetting.IsConfigurable )
+            if( customImporter.OverrideForAndroidSetting.IsConfigurable )
                 audioImporter.SetOverrideSampleSettings( "Android", SetCustomAudioSettings( customImporter.OverrideForAndroidSetting ) );
-            if ( customImporter.OverrideForiOSSetting.IsConfigurable )
-                audioImporter.SetOverrideSampleSettings( "iOS", SetCustomAudioSettings( customImporter.OverrideForiOSSetting ) );
+            else
+                audioImporter.ClearSampleSettingOverride( "Android" );
 
-            if ( customImporter.isLogger )
-                Debug.Log( string.Format( "CustomAudioImporter:" + customImporter.Log + "\nProcessed: {0}", assetPath ) );
+            if( customImporter.OverrideForiOSSetting.IsConfigurable )
+                audioImporter.SetOverrideSampleSettings( "iOS", SetCustomAudioSettings( customImporter.OverrideForiOSSetting ) );
+            else
+                audioImporter.ClearSampleSettingOverride( "iOS" );
+
+            if ( customImporter.IsLogger )
+                Debug.Log( string.Format( "CustomAudioImporter : " + customImporter.Log + "\nProcessed : {0}", assetPath ) );
         }
 
         /// <summary>
@@ -71,8 +76,19 @@ namespace charcolle.Utility.CustomAssetImporter {
                     importerSettings.quality = customSettings.Quality / 100f;
             }
 
-            if ( customSettings.SampleRateSetting.IsConfigurable )
+            // cannot find preload AudioData ;(
+            //if( customSettings.PreloadAudioData.IsConfigurable )
+            //    importerSettings.p = customSettings.PreloadAudioData;
+
+            //Debug.Log( customSettings.SampleRateSetting.IsConfigurable );
+            if ( customSettings.SampleRateSetting.IsConfigurable ) {
                 importerSettings.sampleRateSetting = customSettings.SampleRateSetting;
+                Debug.Log( customSettings.SampleRateSetting.Value );
+                Debug.Log( importerSettings.sampleRateSetting );
+            }
+
+            if( customSettings.SampleRate.IsConfigurable )
+                importerSettings.sampleRateOverride = (uint)customSettings.SampleRate.Value;
 
             return importerSettings;
         }

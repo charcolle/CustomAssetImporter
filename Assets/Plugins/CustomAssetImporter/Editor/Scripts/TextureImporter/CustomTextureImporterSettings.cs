@@ -1,4 +1,4 @@
 ﻿using charcolle.Utility.CustomAssetImporter;
 
-public class CustomTextureImporterSettings: CustomImporterSettingsBase<CustomTextureImporter, CustomTextureImporterValue> {
+internal class CustomTextureImporterSettings: CustomImporterSettingsBase<CustomTextureImporter, CustomTextureImporterValue> {
 }

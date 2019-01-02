@@ -1,5 +1,4 @@
 ﻿using charcolle.Utility.CustomAssetImporter;
 
-public class CustomAudioImporterSettings: CustomImporterSettingsBase<CustomAudioImporter, CustomAudioImporterValue> {
-
+internal class CustomAudioImporterSettings: CustomImporterSettingsBase<CustomAudioImporter, CustomAudioImporterValue> {
 }

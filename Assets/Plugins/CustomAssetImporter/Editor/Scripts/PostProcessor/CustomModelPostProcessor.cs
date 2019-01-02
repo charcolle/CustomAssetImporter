@@ -22,7 +22,7 @@ namespace charcolle.Utility.CustomAssetImporter {
         /// set importer
         /// </summary>
         private void ImporterCustomModel( CustomModelImporter customImporter ) {
-            if ( customImporter == null )
+            if ( customImporter == null || !customImporter.IsEnable )
                 return;
 
             ModelImporter modelImporter = assetImporter as ModelImporter;
@@ -160,7 +160,7 @@ namespace charcolle.Utility.CustomAssetImporter {
                 modelImporter.importAnimatedCustomProperties = customSettings.AnimatedCustomProperties;
 #endif
 
-            if ( customImporter.isLogger )
+            if ( customImporter.IsLogger )
                 Debug.Log( string.Format( "CustomModelImporter:" + customImporter.Log + "\nProcessed: {0}", assetPath ) );
         }
 

@@ -31,7 +31,7 @@ namespace charcolle.Utility.CustomAssetImporter {
             for ( int i = 0; i < TextureSize.Length - 1; i++ ) {
                 var baseSize = TextureSize[i];
                 var nextSize = TextureSize[i + 1];
-                if ( baseSize < textureSize && textureSize <= nextSize )
+                if ( baseSize <= textureSize && textureSize < nextSize )
                     return nextSize;
             }
 

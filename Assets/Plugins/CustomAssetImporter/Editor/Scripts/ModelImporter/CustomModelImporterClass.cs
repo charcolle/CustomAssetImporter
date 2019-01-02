@@ -5,7 +5,7 @@ using System;
 namespace charcolle.Utility.CustomAssetImporter {
 
     [Serializable]
-    public class CustomModelImporter: CustomImporterClass<CustomModelImporterValue> {
+    internal class CustomModelImporter: CustomImporterClass<CustomModelImporterValue> {
 
         public CustomModelImporter() {
             ImporterSetting           = new CustomModelImporterValue( true );
@@ -15,24 +15,20 @@ namespace charcolle.Utility.CustomAssetImporter {
             ImporterSetting           = new CustomModelImporterValue( copy.ImporterSetting );
         }
 
-        public override void Draw() {
-            EditorGUILayout.BeginHorizontal();
-            {
-                GUILayout.Space( 20f );
-                isFoldout = EditorGUILayout.Foldout( isFoldout, "Show Setting" );
-            }
-            EditorGUILayout.EndHorizontal();
-
-            if ( isFoldout ) {
-                ImporterSetting.Value.Draw();
-                GUILayout.Space( 3f );
+        public static CustomModelImporter Root {
+            get {
+                return new CustomModelImporter {
+                    name = "",
+                    depth = -1,
+                    id = 0
+                };
             }
         }
 
     }
 
     [Serializable]
-    public class CustomModelImporterValue: ImporterValue<CustomModelImporterSettingValue> {
+    internal class CustomModelImporterValue: ImporterValue<CustomModelImporterSettingValue> {
 
         public CustomModelImporterValue( bool editable ) {
             IsConfigurable = editable;
@@ -45,7 +41,7 @@ namespace charcolle.Utility.CustomAssetImporter {
     }
 
     [Serializable]
-    public class CustomModelImporterSettingValue {
+    internal class CustomModelImporterSettingValue {
 
         // Model
         public ImporterIntValue ScaleFactor;
@@ -262,187 +258,6 @@ namespace charcolle.Utility.CustomAssetImporter {
             LoopTime                 = new ImporterBoolValue( copy.LoopTime );
         }
         #endregion
-
-        #region drawer
-        private int tabSelected = 0;
-        private string[] tab = new string[] { "Model", "Rig", "Animation", "Material" };
-        public void Draw() {
-
-            tabSelected = GUILayout.Toolbar( tabSelected, tab );
-            EditorGUILayout.BeginVertical( EditorStyles.helpBox );
-            {
-                switch ( tabSelected ) {
-                    case 0:
-                        using ( new ImporterValueScope<int>( ScaleFactor, "ScaleFactor" ) )
-                            ScaleFactor.Value = EditorGUILayout.IntField( ScaleFactor );
-#if UNITY_2017_1_OR_NEWER
-                        using ( new ImporterValueScope<bool>( UseFileScale, "UseFileScale" ) )
-                            UseFileScale.Value = EditorGUILayout.Toggle( UseFileScale );
-#endif
-                        using ( new ImporterValueScope<ModelImporterMeshCompression>( MeshCompression, "MeshCompression" ) )
-                            MeshCompression.Value = ( ModelImporterMeshCompression )EditorGUILayout.EnumPopup( MeshCompression );
-
-                        using ( new ImporterValueScope<bool>( ReadWriteEnabled, "ReadWriteEnabled" ) )
-                            ReadWriteEnabled.Value = EditorGUILayout.Toggle( ReadWriteEnabled );
-
-                        using ( new ImporterValueScope<bool>( OptimizeMesh, "OptimizeMesh" ) )
-                            OptimizeMesh.Value = EditorGUILayout.Toggle( OptimizeMesh );
-
-                        using ( new ImporterValueScope<bool>( ImportBlendShapes, "ImportBlendShapes" ) )
-                            ImportBlendShapes.Value = EditorGUILayout.Toggle( ImportBlendShapes );
-
-                        using ( new ImporterValueScope<bool>( GenerateColliders, "GenerateColliders" ) )
-                            GenerateColliders.Value = EditorGUILayout.Toggle( GenerateColliders );
-
-                        using ( new ImporterValueScope<bool>( KeepQuads, "KeepQuads" ) )
-                            KeepQuads.Value = EditorGUILayout.Toggle( KeepQuads );
-#if UNITY_2017_3_OR_NEWER
-                        using ( new ImporterValueScope<ModelImporterIndexFormat>( IndexFormat, "IndexFormat" ) )
-                            IndexFormat.Value = ( ModelImporterIndexFormat )EditorGUILayout.EnumPopup( IndexFormat );
-#endif
-#if UNITY_5_6_OR_NEWER
-                        using ( new ImporterValueScope<bool>( WeldVertics, "WeldVertics" ) )
-                            WeldVertics.Value = EditorGUILayout.Toggle( WeldVertics );
-#endif
-#if UNITY_2017_1_OR_NEWER
-                        using ( new ImporterValueScope<bool>( ImportVisibility, "ImportVisibility" ) )
-                            ImportVisibility.Value = EditorGUILayout.Toggle( ImportVisibility );
-
-                        using ( new ImporterValueScope<bool>( ImportCameras, "ImportCameras" ) )
-                            ImportCameras.Value = EditorGUILayout.Toggle( ImportCameras );
-
-                        using ( new ImporterValueScope<bool>( ImportLights, "ImportLights" ) )
-                            ImportLights.Value = EditorGUILayout.Toggle( ImportLights );
-#endif
-#if UNITY_2017_3_OR_NEWER
-                        using ( new ImporterValueScope<bool>( PreserverHierarchy, "PreserverHierarchy" ) )
-                            PreserverHierarchy.Value = EditorGUILayout.Toggle( PreserverHierarchy );
-#endif
-                        using ( new ImporterValueScope<bool>( SwapUVs, "SwapUVs" ) )
-                            SwapUVs.Value = EditorGUILayout.Toggle( SwapUVs );
-
-                        using ( new ImporterValueScope<bool>( GenerateLightMapUVs, "GenerateLightMapUVs" ) )
-                            GenerateLightMapUVs.Value = EditorGUILayout.Toggle( GenerateLightMapUVs );
-
-                        if( GenerateLightMapUVs.Value ) {
-                            EditorGUILayout.BeginHorizontal();
-                            {
-                                GUILayout.Space( 10f );
-                                EditorGUILayout.BeginVertical();
-                                {
-                                    using ( new ImporterValueScope<int>( HardAngle, "HardAngle" ) )
-                                        HardAngle.Value = EditorGUILayout.IntSlider( HardAngle, 0, 180 );
-
-                                    using ( new ImporterValueScope<int>( PackMargin, "PackMargin" ) )
-                                        PackMargin.Value = EditorGUILayout.IntSlider( PackMargin, 1, 64 );
-
-                                    using ( new ImporterValueScope<int>( AngleError, "AngleError" ) )
-                                        AngleError.Value = EditorGUILayout.IntSlider( AngleError, 1, 75 );
-
-                                    using ( new ImporterValueScope<int>( AreaError, "AreaError" ) )
-                                        AreaError.Value = EditorGUILayout.IntSlider( AreaError, 1, 75 );
-                                }
-                                EditorGUILayout.EndVertical();
-                            }
-                            EditorGUILayout.EndHorizontal();
-                        } else {
-                            HardAngle.IsConfigurable  = false;
-                            PackMargin.IsConfigurable = false;
-                            AngleError.IsConfigurable = false;
-                            AreaError.IsConfigurable  = false;
-                        }
-
-                        GUILayout.Space( 5f );
-
-                        using ( new ImporterValueScope<ModelImporterNormals>( Normals, "Normals" ) )
-                            Normals.Value = ( ModelImporterNormals )EditorGUILayout.EnumPopup( Normals );
-
-                        if ( Normals.Value.Equals( ModelImporterNormals.Calculate ) ) {
-#if UNITY_2017_1_OR_NEWER
-                            using ( new ImporterValueScope<ModelImporterNormalCalculationMode>( NormalsMode, "NormalsMode" ) )
-                                NormalsMode.Value = ( ModelImporterNormalCalculationMode )EditorGUILayout.EnumPopup( NormalsMode );
-#endif
-                            using ( new ImporterValueScope<int>( SmoothingAngle, "SmoothingAngle" ) )
-                                SmoothingAngle.Value = EditorGUILayout.IntSlider( SmoothingAngle, 0, 180 );
-                        } else {
-#if UNITY_2017_1_OR_NEWER
-                            NormalsMode.IsConfigurable = false;
-#endif
-                            SmoothingAngle.IsConfigurable = false;
-                        }
-
-                        using ( new ImporterValueScope<ModelImporterTangents>( Tangents, "Tangents" ) )
-                            Tangents.Value = ( ModelImporterTangents )EditorGUILayout.EnumPopup( Tangents );
-
-                        GUILayout.Space( 5f );
-                        break;
-                    case 1:
-                        using ( new ImporterValueScope<ModelImporterAnimationType>( AnimationType, "AnimationType" ) )
-                            AnimationType.Value = ( ModelImporterAnimationType )EditorGUILayout.EnumPopup( AnimationType );
-
-                        using ( new ImporterValueScope<bool>( OptimizeGameObject, "OptimizeGameObject" ) )
-                            OptimizeGameObject.Value = EditorGUILayout.Toggle( OptimizeGameObject );
-
-                        break;
-                    case 2:
-                        using ( new ImporterValueScope<bool>( ImportAnimation, "ImportAnimation" ) )
-                            ImportAnimation.Value = EditorGUILayout.Toggle( ImportAnimation );
-
-                        if ( ImportAnimation.Value ) {
-                            using ( new ImporterValueScope<ModelImporterAnimationCompression>( AnimCompression, "AnimCompression" ) )
-                                AnimCompression.Value = ( ModelImporterAnimationCompression )EditorGUILayout.EnumPopup( AnimCompression );
-
-                            using ( new ImporterValueScope<float>( RotaionError, "RotaionError" ) )
-                                RotaionError.Value = EditorGUILayout.FloatField( RotaionError );
-
-                            using ( new ImporterValueScope<float>( PositionError, "PositionError" ) )
-                                PositionError.Value = EditorGUILayout.FloatField( PositionError );
-
-                            using ( new ImporterValueScope<float>( ScaleError, "ScaleError" ) )
-                                ScaleError.Value = EditorGUILayout.FloatField( ScaleError );
-#if UNITY_2017_2_OR_NEWER
-                            using ( new ImporterValueScope<bool>( AnimatedCustomProperties, "AnimatedCustomProperties" ) )
-                                AnimatedCustomProperties.Value = EditorGUILayout.Toggle( AnimatedCustomProperties );
-#endif
-                        } else {
-                            BakeAnimations.IsConfigurable = false;
-                            RotaionError.IsConfigurable = false;
-                            ScaleError.IsConfigurable = false;
-#if UNITY_2017_2_OR_NEWER
-                            AnimatedCustomProperties.IsConfigurable = false;
-#endif
-                        }
-                        GUILayout.Space( 5 );
-                        //GUILayout.Label( "Animation Clip Default" );
-                        //using ( new ImporterValueScope<bool>( LoopTime, "LoopTime" ) )
-                        //    LoopTime.Value = EditorGUILayout.Toggle( LoopTime );
-                        break;
-                    case 3:
-                        using ( new ImporterValueScope<bool>( ImportMaterials, "ImportMaterials" ) )
-                            ImportMaterials.Value = EditorGUILayout.Toggle( ImportMaterials );
-
-                        if ( ImportMaterials.Value ) {
-#if UNITY_2017_3_OR_NEWER
-                            using ( new ImporterValueScope<ModelImporterMaterialLocation>( MaterialLocation, "MaterialLocation" ) )
-                                MaterialLocation.Value = ( ModelImporterMaterialLocation )EditorGUILayout.EnumPopup( MaterialLocation );
-#endif
-                            using ( new ImporterValueScope<ModelImporterMaterialName>( MaterialNaming, "MaterialNaming" ) )
-                                MaterialNaming.Value = ( ModelImporterMaterialName )EditorGUILayout.EnumPopup( MaterialNaming );
-                            using ( new ImporterValueScope<ModelImporterMaterialSearch>( MaterialSearch, "MaterialSearch" ) )
-                                MaterialSearch.Value = ( ModelImporterMaterialSearch )EditorGUILayout.EnumPopup( MaterialSearch );
-                        } else {
-#if UNITY_2017_3_OR_NEWER
-                            MaterialLocation.IsConfigurable = false;
-#endif
-                            MaterialNaming.IsConfigurable = false;
-                            MaterialSearch.IsConfigurable = false;
-                        }
-                        break;
-                }
-            }
-            EditorGUILayout.EndVertical();
-        }
-#endregion
 
     }
 
