@@ -12,13 +12,13 @@ Open setting window with
 1. Select [Audio/Texture/Model] of import settings from the left side menu.
 2. Push the [+] button to add a custom import settings.
 3. Set the target type that you want to apply for the target asset.
-![CustomAssetImporterTargetType](https://github.com/charcolle/CustomAssetImporter/blob/master/customassetimporter_targettype_screenshot.png?raw=true)
+![CustomAssetImporterTargetType](https://github.com/charcolle/CustomAssetImporter/blob/master/DescFiles/customassetimporter_targettype_screenshot.png?raw=true)
 4. Set the target name that you want to apply for the target asset. You can easily set the target name if you drag and drop the target asset to the ImporterSettings's area.
 
 
 ### Texture Importer
-![CustomAssetImporterTexture](https://github.com/charcolle/CustomAssetImporter/blob/master/customassetimporter_texture_screenshot.png?raw=true)
+![CustomAssetImporterTexture](https://github.com/charcolle/CustomAssetImporter/blob/master/DescFiles/customassetimporter_texture_screenshot.png?raw=true)
 ### Audio Imorter
-![CustomAssetImporterAudio](https://github.com/charcolle/CustomAssetImporter/blob/master/customassetimporter_screenshot.png?raw=true)
+![CustomAssetImporterAudio](https://github.com/charcolle/CustomAssetImporter/blob/master/DescFiles/customassetimporter_screenshot.png?raw=true)
 ### Model Imorter
-![CustomAssetImporterModel](https://github.com/charcolle/CustomAssetImporter/blob/master/customassetimporter_model_screenshot.png?raw=true)
+![CustomAssetImporterModel](https://github.com/charcolle/CustomAssetImporter/blob/master/DescFiles/customassetimporter_model_screenshot.png?raw=true)
