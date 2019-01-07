@@ -1,4 +1,4 @@
-# CustomAssetImporter ver2.0
+# CustomAssetImporter ver2.0.1
 これはAssetのImport Settingsを自動で行うのに便利なAssetです。  
 [ここ](https://github.com/charcolle/CustomAssetImporter/releases)からパッケージをダウンロードできます。  
 ### Supported Unity Versions

@@ -1,6 +1,6 @@
 [日本語のREADME](README.ja.md)  
   
-# CustomAssetImporter ver2.0
+# CustomAssetImporter ver2.0.1
 This asset is useful to set asset's import settings automatically.  
 Get the package from [here](https://github.com/charcolle/CustomAssetImporter/releases)  
 ### Supported Unity Versions

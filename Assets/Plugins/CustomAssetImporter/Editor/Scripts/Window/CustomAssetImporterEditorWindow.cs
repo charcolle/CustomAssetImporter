@@ -103,6 +103,7 @@ namespace charcolle.Utility.CustomAssetImporter {
 
                 EditorGUILayout.BeginVertical();
                 GUILayout.FlexibleSpace();
+                selectedImporter = treeView.state.lastClickedID;
                 switch( selectedImporter ) {
                     case 1:
                         GUILayout.Box( GUIHelper.Textures.Audio, GUIStyle.none );

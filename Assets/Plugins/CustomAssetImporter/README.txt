@@ -1,5 +1,5 @@
 // CustomAssetImporter
-// ver 2.0
+// ver 2.0.1
 // thank you for downloading.
 
 Åú Author
@@ -12,7 +12,9 @@
 	MIT
 
 Åú Version
-	1.0 : Release
+	1.0.0 : Release
 
-	2.0 : CHANGE - change gui.
-	      UPDATE - corresponding to 2018.3
+	2.0.0 : CHANGE - change gui.
+	        UPDATE - corresponding to 2018.3
+
+	2.0.1 : FIX - fix GUI bug.
